@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import { Link } from "react-router-dom";
 
 export const Barberos = () =>{
 
@@ -37,8 +38,8 @@ export const Barberos = () =>{
               </div>
             ))}
         </div>
-            <button>
+            <Link to="/turnos">
               <p className='text-2xl'>Agendá tu turno</p>
-            </button>
+            </Link>
     </section>
 }

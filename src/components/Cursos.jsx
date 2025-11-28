@@ -1,5 +1,5 @@
 export const Cursos = () =>{
-    return <section>
+    return <section className="w-full">
             <div className="relative w-full justify-evenly space-x-4 flex flex-row p-15">
                 <span>
                     <p className="absolute text-white font-bold z-10">Barbería inicial</p>

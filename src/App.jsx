@@ -1,21 +1,46 @@
-import './App.css'
-import Navbar from './components/Navbar' //no lleva el .jsx por la exportacion en el archivo
-import Hero from './components/Hero.jsx'
-import Main from './components/Main.jsx'
-import FindUs from './components/FindUs.jsx'
-import Footer from './components/Footer.jsx'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import MainLayout from "./components/MainLayout";
+
+import Hero from './components/Hero'
+import Main from './components/Main'
+import FindUs from './components/FindUs'
+import Turnos from './components/Turnos'
+import { Login } from './components/Login'
+import { Register } from './components/Register'
 
 function App() {
-
   return (
-    <>
-      <Navbar/>
-      <Hero/>
-      <Main/>
-      <FindUs/>
-      <Footer/>
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+
+        {/* Rutas que SI muestran el Navbar */}
+        <Route
+          path="/"
+          element={
+            <MainLayout>
+              <Hero />
+              <Main />
+              <FindUs />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/turnos"
+          element={
+            <MainLayout>
+              <Turnos />
+            </MainLayout>
+          }
+        />
+
+        {/* Rutas sin navbar */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

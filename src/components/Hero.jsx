@@ -2,7 +2,7 @@ import heroImg from '../assets/sucursal ensenada.jpg';
 
 function Hero() {
   return (
-    <div className="relative h-[500px] w-full">
+    <section className="relative h-[500px] w-full">
       <img
         className="absolute inset-0 w-full h-full object-cover blur-[1px] brightness-50"
         src={heroImg}
@@ -24,7 +24,7 @@ function Hero() {
           </span>  
         </p>
       </div>
-    </div>
+    </section>
   );
 }
 
