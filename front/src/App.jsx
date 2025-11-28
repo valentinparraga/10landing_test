@@ -1,5 +1,5 @@
 import './App.css'
-import Navbar from './components/Navbar' //no lleva el .jsx por la exportacion en el archivo
+import Navbar from './components/Navbar.jsx' //no lleva el .jsx por la exportacion en el archivo
 import Hero from './components/Hero.jsx'
 import Main from './components/Main.jsx'
 import FindUs from './components/FindUs.jsx'
