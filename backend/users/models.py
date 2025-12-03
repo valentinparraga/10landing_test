@@ -58,7 +58,8 @@ class User(AbstractUser):
     # Consentimientos
     accepted_terms = models.BooleanField('Aceptó términos y condiciones', default=False)
     accepted_privacy = models.BooleanField('Aceptó política de privacidad', default=False)
-    
+    wants_promotions = models.BooleanField('Desea recibir promociones', default=False)
+
     # Fechas
     created_at = models.DateTimeField('Fecha de registro', auto_now_add=True)
     updated_at = models.DateTimeField('Última actualización', auto_now=True)
