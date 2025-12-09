@@ -23,4 +23,6 @@ urlpatterns = [
 
     #API de autenticacion y usuarios
     path("api/auth/", include("users.urls")),
+
+    path("api/", include("core.urls"))
 ]
