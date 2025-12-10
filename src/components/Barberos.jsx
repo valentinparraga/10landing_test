@@ -39,7 +39,7 @@ export const Barberos = () =>{
             ))}
         </div>
             <Link to="/turnos">
-              <p className='text-2xl'>Agendá tu turno</p>
+              <p className='text-1xl'>Agendá tu turno</p>
             </Link>
     </section>
 }

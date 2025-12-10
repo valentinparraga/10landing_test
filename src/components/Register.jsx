@@ -15,26 +15,43 @@ export const Register = () => {
           <input
             className="border-1 rounded-md border-gray-600 p-2"
             type="Nombre"
+            id="name"
             name="name"
             placeholder="Nombre"
+            required
           />
           <input
             className="border-1 rounded-md border-gray-600 p-2"
             type="Apellido"
+            id="surname"
             name="surname"
             placeholder="Apellido"
+            required
           />
           <input
             className="border-1 rounded-md border-gray-600 p-2"
             type="email"
+            id="email"
             name="email"
             placeholder="Email"
+            required
+          />
+          <input
+            className="border-1 rounded-md border-gray-600 p-2"
+            type="tel"
+            id="phone"
+            name="phone"
+            pattern="[0-9]{3}[0-9]{3}[0-9]{4}"
+            placeholder="Telefono"
+            required 
           />
           <input
             className="border-1 rounded-md border-gray-600 p-2"
             type="passsword"
+            id="password"
             name="passsword"
             placeholder="Contraseña"
+            required
           />
           <button type="submit">Registrarse</button>
         </form>

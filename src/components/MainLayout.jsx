@@ -1,5 +1,5 @@
 //componente creado para mostrar navbar y footer en secciones que lo ameriten
-//y ocultarlo en rutass como login y register
+//y ocultarlo en rutas como login y register
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
