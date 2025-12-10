@@ -12,10 +12,11 @@ export default function Navbar() {
     { name: "Tienda", href: "/tienda" },
   ];
   return (
+
     <nav className="bg-neutral-900">
-      {/* 📱 MENÚ HAMBURGUESA */}
+
+
       <div className="flex justify-around items-center space-x-5 px-2">
-        {/* 📱 LOGO 10 */}
       
       <Link to="/">              
         <img 
@@ -32,9 +33,11 @@ export default function Navbar() {
       </Link>
 
 
-        <button className="md:hidden" onClick={() => setOpen(!open)}>
+        <button className="md:hidden" 
+          onClick={() => setOpen(!open)}>
           {open ? <X size={28} /> : <Menu size={28} />}
         </button>
+
         <ul className="hidden md:flex space-x-5">
           {links.map((link) => (
             <li key={link.name}>
@@ -44,6 +47,7 @@ export default function Navbar() {
             </li>
           ))}
         </ul>
+        
         <span className="flex gap-x-2 hidden md:flex">
             <Link
               onClick={() => setOpen(false)}
@@ -61,19 +65,16 @@ export default function Navbar() {
               Registrarse
             </Link>
         </span>
+
       </div>
       {/* 📱 MENU MOBILE */}
       {open && (
         <ul className="md:hidden flex flex-col items-center space-y-4 bg-neutral-900 py-6 shadow-md">
           {links.map((link) => (
             <li key={link.name}>
-              <a
-                className="text-xl font-semibold"
-                href={link.href}
-                onClick={() => setOpen(false)}
-              >
+              <Link className="text-xl font-semibold"to={link.href}>
                 {link.name}
-              </a>
+              </Link>
             </li>
           ))}
           <span className="flex gap-x-2">
