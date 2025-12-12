@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Branch, Service, Professional, ProfessionalUnavailability
+from .models import Branch, Service, Professional, ProfessionalUnavailability, ProfessionalSchedule
 
 
 class BranchSerializer(serializers.ModelSerializer):
@@ -156,7 +156,7 @@ class ProfessionalDetailSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     branches_data = BranchListSerializer(source='branches', many=True, read_only=True)
     services_data = ServiceSerializer(source='services', many=True, read_only=True)
-    working_schedule = serializers.SerializerMethodField()
+    schedules_by_branch = serializers.SerializerMethodField()
     
     class Meta:
         model = Professional
@@ -171,7 +171,7 @@ class ProfessionalDetailSerializer(serializers.ModelSerializer):
             'profile_picture',
             'branches_data',
             'services_data',
-            'working_schedule',
+            'schedules_by_branch',
             'total_appointments',
             'completed_appointments',
             'average_rating',
@@ -182,21 +182,70 @@ class ProfessionalDetailSerializer(serializers.ModelSerializer):
     def get_full_name(self, obj):
         return obj.get_full_name()
     
-    def get_working_schedule(self, obj):
-        """Retorna el horario de trabajo por día"""
-        days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-        schedule = []
+    def get_schedules_by_branch(self, obj):
+        """Retorna horarios agrupados por sucursal"""
+        schedules = obj.schedules.filter(is_active=True).select_related('branch')
         
-        for i, day_name in enumerate(days):
-            start, end = obj.get_working_hours(i)
-            if start and end:
-                schedule.append({
-                    'day': day_name,
-                    'start': start.strftime('%H:%M'),
-                    'end': end.strftime('%H:%M'),
+        # Agrupar por sucursal
+        result = {}
+        for schedule in schedules:
+            branch_id = schedule.branch.id
+            branch_name = schedule.branch.name
+            
+            if branch_id not in result:
+                result[branch_id] = {
+                    'branch_id': branch_id,
+                    'branch_name': branch_name,
+                    'schedules': []
+                }
+            
+            result[branch_id]['schedules'].append({
+                'weekday': schedule.weekday,
+                'weekday_display': schedule.get_weekday_display(),
+                'start_time': schedule.start_time.strftime('%H:%M'),
+                'end_time': schedule.end_time.strftime('%H:%M'),
+            })
+        
+        return list(result.values())
+
+
+class ProfessionalScheduleSerializer(serializers.ModelSerializer):
+    """Serializer para horarios de profesionales"""
+    
+    weekday_display = serializers.CharField(source='get_weekday_display', read_only=True)
+    branch_name = serializers.CharField(source='branch.name', read_only=True)
+    
+    class Meta:
+        model = ProfessionalSchedule
+        fields = [
+            'id',
+            'professional',
+            'branch',
+            'branch_name',
+            'weekday',
+            'weekday_display',
+            'start_time',
+            'end_time',
+            'is_active',
+        ]
+    
+    def validate(self, data):
+        """Validaciones personalizadas"""
+        # Validar que end_time sea mayor que start_time
+        if 'start_time' in data and 'end_time' in data:
+            if data['end_time'] <= data['start_time']:
+                raise serializers.ValidationError({
+                    'end_time': 'La hora de fin debe ser posterior a la hora de inicio.'
                 })
         
-        return schedule
+        # Validar que el profesional esté asignado a esa sucursal
+        if 'professional' in data and 'branch' in data:
+            if not data['professional'].branches.filter(id=data['branch'].id).exists():
+                raise serializers.ValidationError({
+                    'branch': f'El profesional no está asignado a esta sucursal.'
+                })
+        
+        return data
 
 
 class ProfessionalUnavailabilitySerializer(serializers.ModelSerializer):
@@ -225,3 +274,22 @@ class ProfessionalUnavailabilitySerializer(serializers.ModelSerializer):
     
     def get_is_full_day(self, obj):
         return obj.is_full_day()
+    
+    def validate(self, data):
+        """Validaciones personalizadas"""
+        # Validar que end_date sea mayor o igual a start_date
+        if 'start_date' in data and 'end_date' in data:
+            if data['end_date'] < data['start_date']:
+                raise serializers.ValidationError({
+                    'end_date': 'La fecha de fin no puede ser anterior a la fecha de inicio.'
+                })
+        
+        # Validar horarios si no es día completo
+        if 'start_time' in data and 'end_time' in data:
+            if data['start_time'] and data['end_time']:
+                if data['end_time'] <= data['start_time']:
+                    raise serializers.ValidationError({
+                        'end_time': 'La hora de fin debe ser posterior a la hora de inicio.'
+                    })
+        
+        return data

@@ -240,21 +240,7 @@ class Professional(models.Model):
         blank=True
     )
     
-    # Configuración de horarios
-    monday_start = models.TimeField('Lunes inicio', null=True, blank=True)
-    monday_end = models.TimeField('Lunes fin', null=True, blank=True)
-    tuesday_start = models.TimeField('Martes inicio', null=True, blank=True)
-    tuesday_end = models.TimeField('Martes fin', null=True, blank=True)
-    wednesday_start = models.TimeField('Miércoles inicio', null=True, blank=True)
-    wednesday_end = models.TimeField('Miércoles fin', null=True, blank=True)
-    thursday_start = models.TimeField('Jueves inicio', null=True, blank=True)
-    thursday_end = models.TimeField('Jueves fin', null=True, blank=True)
-    friday_start = models.TimeField('Viernes inicio', null=True, blank=True)
-    friday_end = models.TimeField('Viernes fin', null=True, blank=True)
-    saturday_start = models.TimeField('Sábado inicio', null=True, blank=True)
-    saturday_end = models.TimeField('Sábado fin', null=True, blank=True)
-    sunday_start = models.TimeField('Domingo inicio', null=True, blank=True)
-    sunday_end = models.TimeField('Domingo fin', null=True, blank=True)
+    # Nota: Los horarios ahora se manejan por sucursal en ProfessionalSchedule
     
     # Estadísticas
     total_appointments = models.PositiveIntegerField('Total de turnos', default=0)
@@ -287,27 +273,9 @@ class Professional(models.Model):
         """Retorna nombre completo"""
         return f"{self.first_name} {self.last_name}".strip()
     
-    def get_working_hours(self, day_number):
-        """
-        Retorna horario de trabajo para un día específico
-        day_number: 0=Lunes, 1=Martes, ..., 6=Domingo
-        Retorna: (hora_inicio, hora_fin) o (None, None)
-        """
-        hours_map = {
-            0: (self.monday_start, self.monday_end),
-            1: (self.tuesday_start, self.tuesday_end),
-            2: (self.wednesday_start, self.wednesday_end),
-            3: (self.thursday_start, self.thursday_end),
-            4: (self.friday_start, self.friday_end),
-            5: (self.saturday_start, self.saturday_end),
-            6: (self.sunday_start, self.sunday_end),
-        }
-        return hours_map.get(day_number, (None, None))
-    
-    def is_available_on_day(self, day_number):
-        """Verifica si trabaja un día específico"""
-        start, end = self.get_working_hours(day_number)
-        return start is not None and end is not None
+    def get_schedules_by_branch(self, branch):
+        """Retorna horarios para una sucursal específica"""
+        return self.schedules.filter(branch=branch)
     
     def update_rating(self):
         """Actualiza la calificación promedio (después crearemos el modelo de reseñas)"""
@@ -370,3 +338,111 @@ class ProfessionalUnavailability(models.Model):
     def is_full_day(self):
         """Verifica si es un bloqueo de día completo"""
         return self.start_time is None or self.end_time is None
+    
+    def clean(self):
+        """Validaciones personalizadas"""
+        from django.core.exceptions import ValidationError
+        
+        # Validar que end_date sea mayor o igual a start_date
+        if self.start_date and self.end_date:
+            if self.end_date < self.start_date:
+                raise ValidationError({
+                    'end_date': 'La fecha de fin no puede ser anterior a la fecha de inicio.'
+                })
+            
+            # Validar horarios si es un solo dia
+            if self.end_date == self.start_date:
+                if self.start_time and self.end_time:
+                    if self.end_time <= self.start_time:
+                        raise ValidationError({
+                            'end_time': 'La hora de fin debe ser posterior a la hora de inicio.'
+                        })
+        
+    def save(self, *args, **kwargs):
+        """Ejecutar validaciones antes de guardar"""
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class ProfessionalSchedule(models.Model):
+    """Horarios de trabajo del profesional por sucursal"""
+    
+    WEEKDAY_CHOICES = [
+        (0, 'Lunes'),
+        (1, 'Martes'),
+        (2, 'Miércoles'),
+        (3, 'Jueves'),
+        (4, 'Viernes'),
+        (5, 'Sábado'),
+        (6, 'Domingo'),
+    ]
+    
+    professional = models.ForeignKey(
+        Professional,
+        on_delete=models.CASCADE,
+        related_name='schedules',
+        verbose_name='Profesional'
+    )
+    
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.CASCADE,
+        related_name='professional_schedules',
+        verbose_name='Sucursal'
+    )
+    
+    weekday = models.IntegerField(
+        'Día de la semana',
+        choices=WEEKDAY_CHOICES,
+        help_text='0=Lunes, 6=Domingo'
+    )
+    
+    start_time = models.TimeField('Hora de inicio')
+    end_time = models.TimeField('Hora de fin')
+    
+    is_active = models.BooleanField('Activo', default=True)
+    
+    created_at = models.DateTimeField('Fecha de creación', auto_now_add=True)
+    updated_at = models.DateTimeField('Última actualización', auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Horario de Profesional'
+        verbose_name_plural = 'Horarios de Profesionales'
+        ordering = ['professional', 'branch', 'weekday']
+        unique_together = ['professional', 'branch', 'weekday']
+    
+    def __str__(self):
+        return f"{self.professional.get_full_name()} - {self.branch.name} - {self.get_weekday_display()}: {self.start_time}-{self.end_time}"
+    
+    def get_duration_hours(self):
+        """Calcula la duración del turno en horas"""
+        from datetime import datetime, timedelta
+        
+        start = datetime.combine(datetime.today(), self.start_time)
+        end = datetime.combine(datetime.today(), self.end_time)
+        
+        duration = end - start
+        return duration.total_seconds() / 3600
+    
+    def clean(self):
+        """Validaciones personalizadas"""
+        from django.core.exceptions import ValidationError
+        
+        # Validar que end_time sea mayor que start_time
+        if self.start_time and self.end_time:
+            if self.end_time <= self.start_time:
+                raise ValidationError({
+                    'end_time': 'La hora de fin debe ser posterior a la hora de inicio.'
+                })
+        
+        # Validar que el profesional esté asignado a esa sucursal
+        if self.professional and self.branch:
+            if not self.professional.branches.filter(id=self.branch.id).exists():
+                raise ValidationError({
+                    'branch': f'El profesional {self.professional.get_full_name()} no está asignado a la sucursal {self.branch.name}.'
+                })
+    
+    def save(self, *args, **kwargs):
+        """Ejecutar validaciones antes de guardar"""
+        self.clean()
+        super().save(*args, **kwargs)
