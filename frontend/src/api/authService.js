@@ -4,7 +4,7 @@ import { AUTH_ENDPOINTS, STORAGE_KEYS } from "../utils/constants";
 const authService  = {
     // Registro de usuario
     register: async (userData) => {
-        const response = await axiosInstance.get(AUTH_ENDPOINTS.REGISTER, userData);
+        const response = await axiosInstance.post(AUTH_ENDPOINTS.REGISTER, userData);
 
         if (response.data.tokens) {
             localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, response.data.tokens.access);
@@ -71,7 +71,7 @@ const authService  = {
     // Confirmar reseteo de constraseña
 
     // Verificar si hay usuario logueado
-    idAuthenticated: () => {
+    isAuthenticated: () => {
         return !!localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
     },
 
