@@ -7,6 +7,7 @@ import FindUs from './components/FindUs'
 import Turnos from './components/Turnos'
 import { Login } from './components/Login'
 import { Register } from './components/Register'
+import Test from './components/Test'
 
 function App() {
   return (
@@ -37,7 +38,7 @@ function App() {
         {/* Rutas sin navbar */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
+        <Route path="/test" element={<Test />} />
       </Routes>
     </BrowserRouter>
   );
