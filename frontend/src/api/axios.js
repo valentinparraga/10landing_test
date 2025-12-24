@@ -15,7 +15,7 @@ axiosInstance.interceptors.request.use(
         const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
 
         if (token) {
-            config.headers.Authorization = 'Bearer ${token}';
+            config.headers.Authorization = `Bearer ${token}`;
         }
 
         return config;
@@ -42,7 +42,7 @@ axiosInstance.interceptors.response.use(
                 try {
                     // Intentar refrescar token
                     const { data } = await axios.post(
-                        '${API_BASE_URL}${AUTH_ENDPOINTS.TOKEN_RESFRESH}',
+                        `${API_BASE_URL}${AUTH_ENDPOINTS.TOKEN_REFRESH}`,
                         { refresh: refreshToken }
                     );
 

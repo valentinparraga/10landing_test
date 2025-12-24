@@ -60,14 +60,14 @@ class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        serealizer = LoginSerializer(data=request.data)
-        serealizer.is_valid(raise_exception=True)
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        email = serealizer.valid_data['email']
-        password = serealizer.valid_data['password']
+        email = serializer.validated_data['email']
+        password = serializer.validated_data['password']
 
         # Autenticar usuario
-        user = authenticate(request, username=email, password=password)
+        user = authenticate(request, email=email, password=password)
 
         if user is None:
             return Response({
@@ -84,12 +84,12 @@ class LoginView(APIView):
 
         # Crear sesion
         user_agent = request.META.get('HTTP_USER_AGENT', '')
-        ip_addres = self.get_client_ip(request)
+        ip_address = self.get_client_ip(request)
 
         UserSession.objects.create(
             user=user,
             session_key=str(refresh.access_token),
-            ip_addres=ip_addres,
+            ip_address=ip_address,
             user_agent=user_agent[:255],
             device_info=self.get_device_info(user_agent)
         )

@@ -27,7 +27,7 @@ const Test = () => {
     //   });
 
       // 🔐 Login
-      // const data = await authService.login("test@test.com", "12345678");
+      // const data = await authService.login("test@test.com", "asdHGF123");
 
       // 🔐 Usuario actual (requiere JWT)
       // const data = await authService.getCurrentUser();
@@ -36,7 +36,7 @@ const Test = () => {
       // const data = await authService.getProfile();
 
       // 🔐 Logout
-      // const data = await authService.logout();
+      const data = await authService.logout();
 
 
       // ===============================
