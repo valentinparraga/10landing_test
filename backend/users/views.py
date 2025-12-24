@@ -24,33 +24,32 @@ from .serializers import(
 
 class RegisterView(generics.CreateAPIView):
     """
-    Vista para registro  de nuevos usuarios.
+    Vista para registro de nuevos usuarios.
     POST /api/auth/register/
     """
-
     queryset = User.objects.all()
+    serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
-    serealizer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
-        serealizer = self.get_serealizer(data=request.data)
-        serealizer.is_valid(raise_exception=True)
-        user = serealizer.save()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
 
-        #generar token JWT
         refresh = RefreshToken.for_user(user)
+        user_serializer = UserSerializer(user)
 
-        # serealizar datos del usuario
-        user_serealizer = UserSerializer(user)
-
-        return Response({
-            'message': 'Usuario registrado exitosamente.',
-            'user': user_serealizer.data,
-            'tokens': {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }
-        }, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "message": "Usuario registrado exitosamente.",
+                "user": user_serializer.data,
+                "tokens": {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                },
+            },
+            status=status.HTTP_201_CREATED,
+        )
     
 class LoginView(APIView):
     """
