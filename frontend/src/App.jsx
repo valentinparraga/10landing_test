@@ -5,7 +5,7 @@ import Hero from './components/Hero'
 import Main from './components/Main'
 import FindUs from './components/FindUs'
 import Turnos from './components/Turnos'
-import { Login } from './components/Login'
+import Login from './components/Login'
 import { Register } from './components/Register'
 import Test from './components/Test'
 
