@@ -6,7 +6,7 @@ export const AuthContext = createContext();
 
 // Provider del contexto
 export const AuthProvider =  ({ children }) => {
-    const [User, setUser ] = useState(null);
+    const [user, setUser ] = useState(null);
     const [loading, setLoading] = useState(true);
     const[isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -39,11 +39,11 @@ export const AuthProvider =  ({ children }) => {
             const response = await authService.login(email, password);
             setUser(response.user);
             setIsAuthenticated(true);
-            return { succes: true, data: response};
+            return { success: true, data: response};
         } catch (error) {
             console.error('Error en login: ', error);
             return {
-                succes: false,
+                success: false,
                 error: error.response?.data?.error || 'Error al iniciar sesion'
             };
         }
@@ -55,11 +55,11 @@ export const AuthProvider =  ({ children }) => {
             const response = await authService.register(userData);
             setUser(response.user);
             setIsAuthenticated(true);
-            return { succes: true, data: response };
+            return { success: true, data: response };
         } catch (error) {
             console.error('Error en registro: ', error);
             return {
-                succes: false,
+                success: false,
                 error: error.response?.data || 'Error al registrarse'
             };
         }
@@ -82,11 +82,11 @@ export const AuthProvider =  ({ children }) => {
         try {
             const response = await authService.updateUser(userData);
             setUser(response.user);
-            return { succes: true, data: response };
+            return { success: true, data: response };
         } catch (error) {
             console.error('Error al actualizar perfil: ', error);
             return { 
-                succes: false, 
+                success: false, 
                 error: error.response?.data || 'Error al actualizar perfil'
             };
         }
